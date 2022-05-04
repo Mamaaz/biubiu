@@ -25,12 +25,12 @@
 【Surge】
 -----------------
 [Script]
-NASA每日一图 = type=cron,cronexp=5 0 * * *,script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/nasa/nasapic.js
+NASA每日一图 = type=cron,cronexp=5 0 * * *,script-path=https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/JavaScript/Surge/nasapic.js
 
 【Loon】
 -----------------
 [Script]
-cron "5 0 * * *" script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/nasa/nasapic.js, tag=NASA每日一图
+cron "5 0 * * *" script-path=https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/JavaScript/Surge/nasapic.js, tag=NASA每日一图
 
 【Quantumult X】
 -----------------
@@ -38,8 +38,8 @@ cron "5 0 * * *" script-path=https://raw.githubusercontent.com/evilbutcher/Quant
 5 0 * * * https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/nasa/nasapic.js, tag=NASA每日一图
 
 【Icon】
-透明：https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/picture/nasa_tran.png
-彩色：https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/picture/nasa.png
+透明：https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/picture/nasa_tran.png
+彩色：https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/picture/nasa.png
 */
 
 const $ = new API("NASA");
