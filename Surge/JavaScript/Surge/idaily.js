@@ -21,21 +21,21 @@
 【Surge】
 -----------------
 [Script]
-iDaily每日环球视野 = type=cron,cronexp=5 0 * * *,script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/idaily/idaily.js
+iDaily每日环球视野 = type=cron,cronexp=5 0 * * *,script-path=https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/JavaScript/Surge/idaily.js
 
 【Loon】
 -----------------
 [Script]
-cron "5 0 * * *" script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/idaily/idaily.js, tag=iDaily每日环球视野
+cron "5 0 * * *" script-path=https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/JavaScript/Surge/idaily.js, tag=iDaily每日环球视野
 
 【Quantumult X】
 -----------------
 [task_local]
-5 0 * * * https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/idaily/idaily.js, tag=iDaily每日环球视野
+5 0 * * * https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/JavaScript/Surge/idaily.js, tag=iDaily每日环球视野
 
 【Icon】
-透明：https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/picture/idaily_tran.png
-彩色：https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/picture/idaily.png
+透明：https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/picture/idaily_tran.png
+彩色：https://raw.githubusercontent.com/biubiumaxxx/biubiu/main/Surge/picture/idaily.png
 */
 
 const $ = new API("iDaily");
