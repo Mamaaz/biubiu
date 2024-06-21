@@ -1,0 +1,139 @@
+#!/bin/bash
+
+# 更新包列表并安装Vim、wget、curl和unzip
+echo "Updating package list and installing necessary tools..."
+sudo apt-get update -y && sudo apt-get install -y vim curl wget unzip
+
+# 检测体系结构
+ARCH="$(uname -m)"
+if [ "$ARCH" == "x86_64" ]; then
+    ARCH="x86_64-unknown-linux-musl"
+elif [ "$ARCH" == "aarch64" ]; then
+    ARCH="aarch64-unknown-linux-musl"
+else
+    echo "Unsupported architecture: $ARCH"
+    exit 1
+fi
+
+# Snell Server 部分
+echo "Installing Snell Server..."
+
+# 下载Snell Server
+wget https://dl.nssurge.com/snell/snell-server-v4.0.1-linux-amd64.zip
+
+# 解压Snell Server到指定目录
+sudo unzip snell-server-v4.0.1-linux-amd64.zip -d /usr/local/bin
+
+# 赋予服务器权限
+sudo chmod +x /usr/local/bin/snell-server
+
+# 创建配置文件夹
+sudo mkdir /etc/snell
+
+# 使用Snell的wizard生成一个配置文件
+echo "y" | sudo /usr/local/bin/snell-server --wizard -c /etc/snell/snell-server.conf
+
+# 获取Snell Server端口号和PSK值
+SNELL_PORT=$(grep "listen" /etc/snell/snell-server.conf | cut -d ':' -f 2 | tr -d ' ')
+SNELL_PSK=$(grep "psk" /etc/snell/snell-server.conf | cut -d '=' -f 2 | tr -d ' ')
+
+# 创建用户和组
+sudo useradd -r -s /usr/sbin/nologin snell
+
+# 创建Systemd服务文件
+sudo bash -c 'cat <<EOF > /lib/systemd/system/snell.service
+[Unit]
+Description=Snell Proxy Service
+After=network.target
+[Service]
+Type=simple
+User=snell
+Group=nogroup
+LimitNOFILE=32768
+ExecStart=/usr/local/bin/snell-server -c /etc/snell/snell-server.conf
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=snell-server
+[Install]
+WantedBy=multi-user.target
+EOF'
+
+# 重载服务
+sudo systemctl daemon-reload
+
+# 开机运行Snell
+sudo systemctl enable snell
+
+# Shadow-TLS 部分
+echo "Installing Shadow-TLS..."
+
+# 获取最新的Shadow-TLS版本
+LATEST_VERSION=$(curl -s https://api.github.com/repos/ihciah/shadow-tls/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+# 下载对应架构和版本的Shadow-TLS
+wget "https://github.com/ihciah/shadow-tls/releases/download/$LATEST_VERSION/shadow-tls-$ARCH" -O /usr/local/bin/shadow-tls
+
+# 赋予执行权限
+sudo chmod +x /usr/local/bin/shadow-tls
+
+# 生成16字符随机密码
+PASSWORD=$(openssl rand -base64 16 | tr -dc 'a-zA-Z0-9' | head -c 16)
+
+# 提供TLS域名选项
+echo "Select a TLS domain:"
+OPTIONS=("mp.weixin.qq.com" "upyun.com" "douyin.com" "toutiao.com" "sns-video-hw.xhscdn.com" "gateway.icloud.com")
+select TLS_DOMAIN in "${OPTIONS[@]}"
+do
+    break
+done
+
+# 询问用户输入自定义端口号
+read -p "Enter the port number for Shadow-TLS (default is 8443): " SHADOW_TLS_PORT
+SHADOW_TLS_PORT=${SHADOW_TLS_PORT:-8443}
+
+# 创建Shadow-TLS的Systemd服务文件
+sudo bash -c "cat <<EOF > /etc/systemd/system/shadow-tls.service
+[Unit]
+Description=Shadow-TLS Server Service
+Documentation=man:sstls-server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/shadow-tls --fastopen --v3 server --listen ::0:$SHADOW_TLS_PORT --server 127.0.0.1:$SNELL_PORT --tls $TLS_DOMAIN --password $PASSWORD
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=shadow-tls
+
+[Install]
+WantedBy=multi-user.target
+EOF"
+
+# 重载服务
+echo "Reloading Systemd daemon..."
+sudo systemctl daemon-reload
+
+# 开机运行Shadow-TLS
+echo "Enabling Shadow-TLS service to start on boot..."
+sudo systemctl enable shadow-tls.service
+
+# 启动服务
+echo "Starting Shadow-TLS service..."
+sudo systemctl start shadow-tls.service
+
+# 重启服务以确保配置生效
+sudo systemctl restart snell
+sudo systemctl restart shadow-tls.service
+
+# 输出配置信息
+echo "---------------------------------------------------"
+echo "Setup complete! Here are the configuration details:"
+echo "Snell is listening on port: $SNELL_PORT"
+echo "Snell PSK: $SNELL_PSK"
+echo "Shadow-TLS is listening on port: $SHADOW_TLS_PORT"
+echo "Shadow-TLS password: $PASSWORD"
+echo "Shadow-TLS TLS domain: $TLS_DOMAIN"
+echo "---------------------------------------------------"
+
