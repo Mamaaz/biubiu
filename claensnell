@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# 停止并禁用Snell服务
+echo "Stopping and disabling Snell service..."
+sudo systemctl stop snell
+sudo systemctl disable snell
+
+# 删除Snell相关文件和配置
+echo "Removing Snell files and configuration..."
+sudo rm -f /usr/local/bin/snell-server
+sudo rm -rf /etc/snell
+sudo rm -f /lib/systemd/system/snell.service
+
+# 停止并禁用Shadow-TLS服务
+echo "Stopping and disabling Shadow-TLS service..."
+sudo systemctl stop shadow-tls
+sudo systemctl disable shadow-tls
+
+# 删除Shadow-TLS相关文件和配置
+echo "Removing Shadow-TLS files and configuration..."
+sudo rm -f /usr/local/bin/shadow-tls
+sudo rm -f /etc/systemd/system/shadow-tls.service
+
+# 重载systemd配置
+echo "Reloading systemd configuration..."
+sudo systemctl daemon-reload
+
+# 清理完成
+echo "Cleanup complete! Snell and Shadow-TLS have been removed."
+
+# 显示操作结果
+echo "---------------------------------------------------"
+echo "Snell and Shadow-TLS services have been stopped, disabled, and removed."
+echo "All related files and configurations have been deleted."
